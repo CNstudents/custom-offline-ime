@@ -868,7 +868,8 @@ class CustomImeService : InputMethodService(), KeyboardView.Listener,
             Prefs.KEY_SOUND -> soundFx.refresh()
 
             Prefs.KEY_CHINESE_MODE -> {
-                chinese = shouldUseChinese()
+                // 用户在应用内主动切换语言时不再受子类型限制，否则在英文子类型下无法切到中文
+                chinese = Prefs.isChineseMode(this) && !numericEditor && !passwordEditor
                 applyLayout()
             }
 

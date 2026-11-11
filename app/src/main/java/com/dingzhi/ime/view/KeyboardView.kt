@@ -421,6 +421,7 @@ class KeyboardView(context: Context) : View(context) {
 
         override fun getVirtualViewAt(x: Float, y: Float): Int {
             val key = findKey(x, y) ?: return ExploreByTouchHelper.HOST_ID
+            if (key.type == KeyType.NONE) return ExploreByTouchHelper.HOST_ID
             return idOf(key)
         }
 
@@ -442,8 +443,9 @@ class KeyboardView(context: Context) : View(context) {
             val rowIndex = virtualViewId / VIRTUAL_ID_ROW_FACTOR
             val column = virtualViewId % VIRTUAL_ID_ROW_FACTOR
             val key = rows.getOrNull(rowIndex)?.getOrNull(column)
-            if (key == null) {
-                node.contentDescription = ""
+            if (key == null || key.type == KeyType.NONE) {
+                node.contentDescription = "空白"
+                node.text = "空白"
                 node.setBoundsInParent(Rect())
                 return
             }
