@@ -1,0 +1,23 @@
+// 工程设置：统一声明插件仓库与依赖仓库，兼容国内网络环境下的 Android Studio 同步
+pluginManagement {
+    repositories {
+        // Google Maven 的 dl.google.com 镜像（国内 maven.google.com 常常不可达）
+        maven { url 'https://dl.google.com/dl/android/maven2' }
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    // 只允许在 settings 中统一声明仓库，避免子模块重复配置
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url 'https://dl.google.com/dl/android/maven2' }
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "CustomIme"
+include ':app'

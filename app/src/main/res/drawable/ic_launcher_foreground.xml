@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自适应图标前景层（仅 API 26+ 使用，低版本系统读取 mipmap-*/ic_launcher.png）
+  图形：白色圆角键盘 + 蓝色键帽，位于 72dp 安全区内
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 键盘外壳 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,43 a7,7 0 0 1 7,-7 h42 a7,7 0 0 1 7,7 v22 a7,7 0 0 1 -7,7 h-42 a7,7 0 0 1 -7,-7 z" />
+
+    <!-- 键帽：第一行 -->
+    <path
+        android:fillColor="#2F6BFF"
+        android:pathData="M33,44 h6 v6 h-6 z M41,44 h6 v6 h-6 z M49,44 h6 v6 h-6 z M57,44 h6 v6 h-6 z M65,44 h6 v6 h-6 z M73,44 h6 v6 h-6 z" />
+
+    <!-- 键帽：第二行 -->
+    <path
+        android:fillColor="#2F6BFF"
+        android:pathData="M33,53 h6 v6 h-6 z M41,53 h6 v6 h-6 z M49,53 h6 v6 h-6 z M57,53 h6 v6 h-6 z M65,53 h6 v6 h-6 z M73,53 h6 v6 h-6 z" />
+
+    <!-- 空格键 -->
+    <path
+        android:fillColor="#2F6BFF"
+        android:pathData="M33,62 h42 v6 h-42 z" />
+</vector>

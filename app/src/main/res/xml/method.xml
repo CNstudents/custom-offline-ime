@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  输入法子类型声明：
+  - settingsActivity 指向设置页，系统输入法管理界面可直接跳到本应用设置
+  - 只声明一个中文（全拼）子类型，英文/数字/符号键盘由应用内「中/英」「123」键切换，
+    这样在老系统上不会出现子类型切换弹窗，兼容性最好
+-->
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.dingzhi.ime.SettingsActivity"
+    android:supportsSwitchingToNextInputMethod="false">
+
+    <subtype
+        android:label="@string/ime_subtype_zh"
+        android:imeSubtypeLocale="zh_CN"
+        android:imeSubtypeMode="keyboard"
+        android:isAsciiCapable="false" />
+</input-method>

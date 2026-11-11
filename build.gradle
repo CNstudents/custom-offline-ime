@@ -1,0 +1,6 @@
+// 根构建脚本：只声明插件版本，不把插件应用到根工程
+plugins {
+    // AGP 8.6.1 + Gradle 8.7 + JDK 17，可正常编译 minSdk 19 / targetSdk 34 的工程
+    id 'com.android.application' version '8.6.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
+}

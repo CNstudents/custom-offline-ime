@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 浅色模式配色（设置页使用；输入法键盘配色由代码内 Skin 控制） -->
+<resources>
+    <color name="page_bg">#F4F6F9</color>
+    <color name="card_bg">#FFFFFF</color>
+    <color name="text_primary">#16181D</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="divider">#ECEFF3</color>
+    <color name="accent">#2F6BFF</color>
+    <color name="accent_soft">#1A2F6BFF</color>
+    <color name="chip_bg">#EEF1F6</color>
+    <color name="input_bg">#F7F8FA</color>
+    <color name="success">#12996B</color>
+    <color name="warning">#D97706</color>
+    <color name="white">#FFFFFF</color>
+    <color name="ic_launcher_background">#2F6BFF</color>
+</resources>

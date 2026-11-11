@@ -1,0 +1,60 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.dingzhi.ime'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.dingzhi.ime"
+        // 兼容 Android 4.4 起的全部机型
+        minSdk 19
+        // 跟随 Android 14 的隐私与前台限制
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildFeatures {
+        // 设置页要显示版本号，需要 BuildConfig
+        buildConfig true
+    }
+
+    buildTypes {
+        debug {
+            // 调试包使用同一套包名，方便直接覆盖安装
+            minifyEnabled false
+        }
+        release {
+            // 不混淆：输入法服务类、资源反射极少，关闭混淆可最大限度降低老机型风险
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        // 保持 Java 8 字节码，不启用脱糖/新 API，避免 API 19 上出现 NoClassDefFoundError
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    lint {
+        // 老工程 + minSdk 19 会命中一些无意义的提示，这里不让 lint 阻塞打包
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    // 唯一的额外依赖：AppCompat 作为低版本兜底（minSdk 14，可安全运行在 API 19）
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    // core 1.12.0 的最低版本仍为 API 19，避免被更高版本强制拉到 minSdk 21
+    implementation "androidx.core:core:1.12.0"
+}

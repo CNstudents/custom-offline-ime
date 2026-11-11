@@ -1,0 +1,628 @@
+# =====================================================================
+# 定制版输入法 · 本地拼音词库（assets/dict/pinyin.txt）
+# 纯文本、完全离线，启动后在后台线程懒加载，不上传任何内容。
+#
+# 行格式（字段之间用空格或 Tab 分隔）：
+#   格式一：  pinyin 汉字串             -> 拆成单字词条，位置越靠前频率越高
+#   格式二：  pinyin 词语 频率           -> 词语词条，频率越大越靠前（0~9999）
+# 以 # 开头的行为注释，空行忽略。
+# 拼音统一小写、不带声调，ü 用 v 表示（如 nv 女）。
+# =====================================================================
+
+# ---------------- 单音节常用字（全拼首屏候选） ----------------
+a 啊阿吖
+ai 爱哎哀挨
+an 安按暗案
+ang 昂
+ao 奥熬澳
+ba 把八吧爸拔
+bai 白百拜败
+ban 半办班般板
+bang 帮榜棒绑
+bao 包保报宝抱
+bei 被北备杯背
+ben 本奔笨
+beng 崩蹦
+bi 比笔必毕避
+bian 边变便遍编
+biao 表标彪
+bie 别憋
+bin 宾滨
+bing 病并冰兵
+bo 波播博伯
+bu 不部步布补
+ca 擦
+cai 才菜财采彩
+can 参残餐
+cang 藏仓
+cao 草操曹
+ce 测侧策
+ceng 层曾
+cha 查茶差插
+chai 拆柴
+chan 产缠
+chang 长常场唱厂
+chao 超朝吵
+che 车扯
+chen 陈沉晨
+cheng 成城程乘
+chi 吃持迟池
+chong 重冲虫
+chou 抽仇愁
+chu 出处初除
+chuan 传船穿
+chuang 创床窗
+chui 吹锤
+chun 春纯
+ci 次此词刺
+cong 从聪
+cu 粗促
+cun 存村
+cuo 错措
+da 大打达答
+dai 带代待袋
+dan 但单担蛋
+dang 当党档
+dao 到道倒刀
+de 的得德
+deng 等灯登
+di 地第低底
+dian 点电店典
+diao 掉调雕
+die 跌爹
+ding 定顶订
+diu 丢
+dong 东动懂冬
+dou 都豆斗
+du 度读独肚
+duan 段短断
+dui 对队
+dun 顿蹲
+duo 多夺朵
+e 饿额恶
+en 恩
+er 儿二而耳
+fa 发法罚
+fan 反饭翻犯
+fang 方房放防
+fei 非飞费肥
+fen 分份粉
+feng 风封峰
+fo 佛
+fou 否
+fu 副服复府父
+ga 嘎
+gai 该改盖
+gan 干感赶敢
+gang 刚钢港
+gao 高告搞
+ge 个各歌格
+gei 给
+gen 根跟
+geng 更耕
+gong 工公共功
+gou 够狗购
+gu 古顾故谷
+gua 挂刮
+guan 关管观馆
+guang 光广
+gui 贵规鬼
+guo 国过果锅
+ha 哈
+hai 还海害孩
+han 汉含汗
+hang 行航
+hao 好号毫
+he 和合河喝
+hei 黑
+hen 很恨
+heng 横
+hong 红宏洪
+hou 后候厚
+hu 户互胡湖
+hua 花化话画
+huai 坏怀
+huan 换欢环
+huang 黄皇
+hui 会回灰汇
+hun 婚混
+huo 活火或货
+ji 几机及记级
+jia 家加价假
+jian 见件间建
+jiang 将讲江
+jiao 叫教交角
+jie 接解姐街
+jin 今金进近
+jing 经京精静
+jiong 窘
+jiu 就九酒久
+ju 局举句据
+juan 卷捐
+jue 觉决绝
+jun 军均君
+ka 卡咖
+kai 开凯
+kan 看砍
+kang 抗康
+kao 考靠
+ke 可科克课
+ken 肯
+kong 空恐控
+kou 口扣
+ku 苦哭库
+kua 夸跨
+kuai 快块筷
+kuan 款宽
+kuang 况矿
+kui 亏愧
+kun 困昆
+kuo 扩阔
+la 拉啦辣
+lai 来赖
+lan 兰蓝烂
+lang 浪狼
+lao 老劳牢
+le 了乐
+lei 累类泪
+leng 冷
+li 里理力立
+lia 俩
+lian 连脸练
+liang 两量亮
+liao 料聊
+lie 列烈
+lin 林临
+ling 另领零
+liu 六流留
+long 龙隆
+lou 楼漏
+lu 路露陆
+luan 乱
+lun 论轮
+luo 落罗
+ma 妈马吗码
+mai 买卖麦
+man 满慢
+mang 忙盲
+mao 毛猫帽
+me 么
+mei 没每美
+men 们门
+meng 梦蒙
+mi 米密迷
+mian 面免棉
+miao 秒妙
+mie 灭
+min 民敏
+ming 名明命
+mo 摸模末
+mou 某
+mu 母目木
+na 那拿哪
+nai 奶耐
+nan 男南难
+nao 脑闹
+ne 呢
+nei 内
+neng 能
+ni 你尼泥拟
+nian 年念
+niang 娘
+niao 鸟
+nie 捏
+nin 您
+ning 宁
+niu 牛扭
+nong 农弄
+nu 努怒
+nv 女
+nuan 暖
+nuo 诺挪
+o 哦
+ou 欧
+pa 怕爬
+pai 拍排牌
+pan 盘判盼
+pang 旁胖
+pao 跑泡
+pei 陪配
+pen 盆
+peng 朋碰
+pi 批皮匹
+pian 片偏
+piao 票飘
+pin 品拼
+ping 平评瓶
+po 破坡
+pu 普铺
+qi 起其气期
+qia 恰
+qian 前钱千
+qiang 强墙
+qiao 桥巧敲
+qie 切且
+qin 亲琴勤
+qing 请清情轻
+qiong 穷
+qiu 求球秋
+qu 去区取曲
+quan 全权圈
+que 却确
+qun 群
+ran 然染
+rang 让
+rao 绕扰
+re 热
+ren 人认任
+reng 仍
+ri 日
+rong 容荣
+rou 肉柔
+ru 如入
+ruan 软
+rui 瑞
+run 润
+ruo 若弱
+sa 撒
+sai 赛
+san 三
+sang 桑嗓
+sao 扫
+se 色
+sen 森
+seng 僧
+sha 沙杀
+shai 晒
+shan 山善扇
+shang 上商伤
+shao 少烧
+she 社设蛇
+shei 谁
+shen 身深什神
+sheng 生声省胜
+shi 是事时十
+shou 手受收首
+shu 书树数输
+shua 刷
+shuai 帅摔
+shuang 双霜
+shui 水睡谁
+shun 顺
+shuo 说
+si 四死思司
+song 送松宋
+sou 搜
+su 速素苏
+suan 算酸
+sui 虽随岁
+sun 孙损
+suo 所锁缩
+ta 他她它塔
+tai 太台抬
+tan 谈弹探
+tang 糖堂躺
+tao 讨套桃
+te 特
+teng 疼腾
+ti 题体提替
+tian 天田甜
+tiao 条跳挑
+tie 铁贴
+ting 听停挺
+tong 同通痛
+tou 头投偷
+tu 图土兔
+tuan 团
+tui 推退腿
+tun 吞
+tuo 托脱
+wa 挖娃瓦
+wai 外歪
+wan 完万玩晚
+wang 王往网忘
+wei 为位未味
+wen 问文温闻
+weng 翁
+wo 我握窝
+wu 无五物武
+xi 西希洗喜
+xia 下夏吓
+xian 先现线显
+xiang 想向相香
+xiao 小笑校消
+xie 写些鞋谢
+xin 新心信
+xing 行性星形
+xiong 兄胸
+xiu 修秀休
+xu 需许续须
+xuan 选宣
+xue 学雪血
+xun 训寻迅
+ya 呀压牙鸭
+yan 眼烟严言
+yang 样养阳羊
+yao 要药摇
+ye 也业叶夜
+yi 一以已衣
+yin 因音银引
+ying 应英影赢
+yo 哟
+yong 用永勇
+you 有又友右
+yu 于与语雨
+yuan 元远院原
+yue 月越约
+yun 云运晕
+za 杂砸
+zai 在再灾
+zan 咱赞
+zang 脏
+zao 早造遭
+ze 则责泽
+zei 贼
+zen 怎
+zeng 增曾
+zha 炸扎眨
+zhai 摘窄
+zhan 站战占
+zhao 找照招
+zhe 这着者
+zhen 真针阵
+zheng 正整证
+zhi 知只之直
+zhong 中种重钟
+zhou 周州洲
+zhu 主住注猪
+zhua 抓
+zhuan 转专
+zhuang 装状
+zhui 追
+zhun 准
+zhuo 桌卓
+zi 自子字资
+zong 总宗
+zou 走
+zu 组足族
+zuan 钻
+zui 最嘴
+zun 尊
+zuo 做作坐左
+
+# ---------------- 常用词语（全拼 / 简拼候选） ----------------
+nihao 你好 9990
+xiexie 谢谢 9980
+zaijian 再见 9900
+duibuqi 对不起 9880
+meiguanxi 没关系 9860
+meiwenti 没问题 9840
+bukeqi 不客气 9820
+qingwen 请问 9800
+shenme 什么 9990
+weishenme 为什么 9950
+zenme 怎么 9960
+zenmeyang 怎么样 9900
+zenmeban 怎么办 9800
+keyi 可以 9940
+bukeyi 不可以 9000
+zhidao 知道 9940
+buzhidao 不知道 9900
+xianzai 现在 9950
+jintian 今天 9940
+mingtian 明天 9900
+zuotian 昨天 9800
+xingqi 星期 9700
+xingqitian 星期天 9500
+zhoumo 周末 9600
+shijian 时间 9900
+dianhua 电话 9900
+shouji 手机 9950
+haoma 号码 9600
+xinxi 信息 9700
+xiaoxi 消息 9700
+gongzuo 工作 9900
+xuexi 学习 9850
+shenghuo 生活 9700
+pengyou 朋友 9950
+jiaren 家人 9600
+haizi 孩子 9600
+fumu 父母 9500
+laogong 老公 9500
+laopo 老婆 9500
+nanpengyou 男朋友 9400
+nvpengyou 女朋友 9400
+laoshi 老师 9800
+xuesheng 学生 9750
+tongxue 同学 9750
+xiansheng 先生 9600
+xiaojie 小姐 9600
+nvshi 女士 9400
+wanan 晚安 9700
+zaoshang 早上 9700
+zhongwu 中午 9500
+wanshang 晚上 9700
+zaoshanghao 早上好 9800
+wanshanghao 晚上好 9750
+shengri 生日 9700
+kuaile 快乐 9800
+shengrikuaile 生日快乐 9900
+xinnian 新年 9700
+xinniankuaile 新年快乐 9750
+gongxifacai 恭喜发财 9600
+wanshiruyi 万事如意 9500
+shentijiankang 身体健康 9500
+yilushunfeng 一路顺风 9400
+zhuyianquan 注意安全 9400
+zaodianxiuxi 早点休息 9300
+duohereshui 多喝热水 9300
+xinkule 辛苦了 9600
+huitoujian 回头见 9400
+qingshaodeng 请稍等 9500
+shoudao 收到 9700
+mingbai 明白 9600
+xingba 行吧 9200
+shide 是的 9700
+bushi 不是 9800
+duide 对的 9500
+cuole 错了 9400
+zhende 真的 9800
+haode 好的 9900
+meiyou 没有 9950
+youde 有的 9600
+zhege 这个 9950
+nage 那个 9900
+zheli 这里 9800
+nali 哪里 9800
+zaina 在哪 9700
+zhebian 这边 9500
+nabian 那边 9500
+duoshao 多少 9800
+duoshaoqian 多少钱 9800
+yidian 一点 9700
+yixia 一下 9750
+yiqi 一起 9750
+yizhi 一直 9700
+yijing 已经 9750
+yinwei 因为 9800
+suoyi 所以 9800
+danshi 但是 9800
+ruguo 如果 9750
+haishi 还是 9750
+huozhe 或者 9600
+erqie 而且 9550
+ranhou 然后 9650
+zhongyu 终于 9400
+kaishi 开始 9750
+jieshu 结束 9500
+shangban 上班 9700
+xiaban 下班 9650
+jiaban 加班 9500
+kaihui 开会 9550
+chuchai 出差 9400
+qingjia 请假 9350
+xiuxi 休息 9600
+chifan 吃饭 9850
+heshui 喝水 9600
+shuijiao 睡觉 9700
+qichuang 起床 9600
+maidan 买单 9400
+fuwuyuan 服务员 9300
+caidan 菜单 9350
+jiage 价格 9500
+youhui 优惠 9400
+huodong 活动 9400
+dingdan 订单 9400
+fahuo 发货 9300
+kuaidi 快递 9500
+shoujianren 收件人 9200
+lianxidianhua 联系电话 9300
+dizhi 地址 9600
+mingzi 名字 9600
+gongsi 公司 9700
+danwei 单位 9500
+lingdao 领导 9400
+tongshi 同事 9500
+kehu 客户 9450
+huiyi 会议 9550
+baogao 报告 9450
+wenjian 文件 9550
+youjian 邮件 9500
+tongzhi 通知 9450
+xitong 系统 9550
+ruanjian 软件 9500
+banben 版本 9400
+anzhuang 安装 9500
+xiazai 下载 9550
+shangchuan 上传 9350
+baocun 保存 9500
+shanchu 删除 9550
+xiugai 修改 9500
+shezhi 设置 9600
+shuru 输入 9500
+shuchu 输出 9300
+jianpan 键盘 9550
+shurufa 输入法 9650
+pinyin 拼音 9600
+quanpin 全拼 9300
+jianpin 简拼 9250
+lianxiang 联想 9200
+zhongwen 中文 9600
+yingwen 英文 9550
+shuzi 数字 9450
+fuhao 符号 9400
+lixian 离线 9500
+yinsi 隐私 9600
+anquan 安全 9600
+quanxian 权限 9500
+beifen 备份 9350
+huifu 恢复 9400
+qingchu 清除 9400
+quanbu 全部 9450
+bufen 部分 9400
+queding 确定 9700
+quxiao 取消 9650
+xuanze 选择 9700
+chakan 查看 9500
+tianjia 添加 9550
+bianji 编辑 9450
+fanhui 返回 9600
+denglu 登录 9600
+zhuce 注册 9450
+mima 密码 9550
+zhanghao 账号 9500
+zhifu 支付 9550
+weixin 微信 9900
+youxiang 邮箱 9500
+qq QQ 9000
+tianqi 天气 9600
+wendu 温度 9350
+xiayu 下雨 9400
+yundong 运动 9450
+paobu 跑步 9400
+kaoshi 考试 9450
+chengji 成绩 9400
+zhongguo 中国 9990
+beijing 北京 9900
+shanghai 上海 9850
+guangzhou 广州 9650
+shenzhen 深圳 9650
+hangzhou 杭州 9550
+chengdu 成都 9550
+wuhan 武汉 9500
+xian 西安 9400
+nanjing 南京 9450
+dajia 大家 9800
+women 我们 9990
+nimen 你们 9900
+tamen 他们 9850
+ziji 自己 9850
+diannao 电脑 9700
+dianshi 电视 9600
+yinyue 音乐 9600
+dianying 电影 9650
+zhaopian 照片 9500
+shipin 视频 9550
+youxi 游戏 9500
+shangwang 上网 9400
+lianwang 联网 9300
+wenzhang 文章 9400
+xiaoshuo 小说 9350
+gushi 故事 9350
+xinwen 新闻 9500
+gongyuan 公园 9300
+yiyuan 医院 9400
+xuexiao 学校 9500
+gongsi 公司 9700
+jiali 家里 9600
+waimian 外面 9400
+shangmian 上面 9350
+xiamian 下面 9350
+zuobian 左边 9300
+youbian 右边 9300
+qianmian 前面 9350
+houmian 后面 9350
+mingtianjian 明天见 9500
+jintianjian 今天见 9200
+wanshangjian 晚上见 9200
+zaijian 再见 9900

@@ -1,0 +1,27 @@
+# Gradle / Android 构建产物
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.ap_
+*.idsig
+
+# 本机路径配置（含 SDK 路径，不能入库）
+local.properties
+
+# 签名文件与密钥，严禁入库
+*.jks
+*.keystore
+key.properties
+
+# IDE
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 系统垃圾文件
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 10（API 29）起系统会强制对未适配的应用做「强制深色」，这里显式关闭，
+     保证设置页的颜色完全由本应用手动切换的深浅模式决定 -->
+<resources>
+    <style name="AppTheme" parent="AppThemeBase">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>
