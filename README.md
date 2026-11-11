@@ -20,6 +20,8 @@
 
 已实测的包信息：`package=com.dingzhi.ime`、`versionName=1.1.0`、`sdkVersion=19`、`targetSdkVersion=34`、`application-label=定制版输入法`、权限仅 `VIBRATE`，词库 `assets/dict/*.txt` 已打进包内。
 
+> `apk/` 目录下的安装包已随源码一起提交到仓库，可直接从仓库下载安装；旧版本（1.0.0）安装包不再保留，仅保留当前 1.1.0 的 release 与 debug 版本。
+
 > release 版开启 R8 代码压缩与资源裁剪后体积从 2.5 MB 降到 0.9 MB。
 >
 > 这两个包用一次性临时证书签名（证书未随工程提供）。后续若要发布升级包，请按第五节用 `keytool` 生成自己的证书并**一直沿用同一个证书**，否则覆盖安装会因签名不一致失败（需先卸载旧版）。
