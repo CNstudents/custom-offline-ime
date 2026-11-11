@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 键盘尺寸集中定义，横屏 / 平板在 values-land、values-sw600dp 中单独覆盖 -->
+<resources>
+    <!-- 候选栏高度 -->
+    <dimen name="candidate_bar_height">38dp</dimen>
+
+    <!-- 按键间距与内边距 -->
+    <dimen name="key_gap">5dp</dimen>
+    <dimen name="key_side_padding">3dp</dimen>
+    <dimen name="key_row_gap">6dp</dimen>
+    <dimen name="key_vertical_padding">4dp</dimen>
+    <dimen name="key_text_padding">4dp</dimen>
+
+    <!-- 按键文字大小 -->
+    <dimen name="key_char_text">20sp</dimen>
+    <dimen name="key_func_text">12sp</dimen>
+</resources>

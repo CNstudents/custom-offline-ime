@@ -253,6 +253,127 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btn_add_word).setOnClickListener { showAddWordDialog() }
         findViewById<TextView>(R.id.btn_add_phrase).setOnClickListener { showAddPhraseDialog() }
         findViewById<TextView>(R.id.btn_clear_dict).setOnClickListener { showClearDialog() }
+        findViewById<TextView>(R.id.btn_manage_dict).setOnClickListener { showManageDialog() }
+        findViewById<TextView>(R.id.btn_export_dict).setOnClickListener { exportDict() }
+        findViewById<TextView>(R.id.btn_import_dict).setOnClickListener { importDict() }
+    }
+
+    /** 管理词库：列出全部自定义词条与短语，点击后确认删除 */
+    private fun showManageDialog() {
+        val words = UserDictStore.words(this)
+        val phrases = UserDictStore.phrases(this)
+        if (words.isEmpty() && phrases.isEmpty()) {
+            Toast.makeText(this, R.string.toast_empty_dict, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val labels = ArrayList<String>(words.size + phrases.size)
+        for (item in words) labels.add("词条：${item.pinyin} → ${item.word}")
+        for (item in phrases) labels.add("短语：${item.code} → ${item.text}")
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_manage_title)
+            .setItems(labels.toTypedArray()) { _, which ->
+                if (which < words.size) {
+                    confirmDeleteWord(words[which])
+                } else {
+                    confirmDeletePhrase(phrases[which - words.size])
+                }
+            }
+            .setNegativeButton(R.string.btn_close, null)
+            .show()
+    }
+
+    private fun confirmDeleteWord(item: UserDictStore.Word) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_delete_title)
+            .setMessage(getString(R.string.dialog_delete_msg, item.word))
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.btn_clear_dict) { _, _ ->
+                UserDictStore.removeWord(this, item.pinyin, item.word)
+                refreshDictCount()
+                Toast.makeText(this, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
+                showManageDialog()
+            }
+            .show()
+    }
+
+    private fun confirmDeletePhrase(item: UserDictStore.Phrase) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_delete_title)
+            .setMessage(getString(R.string.dialog_delete_msg, item.text))
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.btn_clear_dict) { _, _ ->
+                UserDictStore.removePhrase(this, item.code, item.text)
+                refreshDictCount()
+                Toast.makeText(this, R.string.toast_deleted, Toast.LENGTH_SHORT).show()
+                showManageDialog()
+            }
+            .show()
+    }
+
+    /** 导出词库：使用系统文件选择器（API 19+ 的 SAF），不需要存储权限 */
+    private fun exportDict() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TITLE, "dingzhi-dict.txt")
+        }
+        try {
+            startActivityForResult(intent, REQ_EXPORT_DICT)
+        } catch (t: Throwable) {
+            Toast.makeText(this, R.string.toast_invalid, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** 导入词库：同样走 SAF，用户选择 txt 后合并到现有词库 */
+    private fun importDict() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/plain"
+        }
+        try {
+            startActivityForResult(intent, REQ_IMPORT_DICT)
+        } catch (t: Throwable) {
+            Toast.makeText(this, R.string.toast_invalid, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != RESULT_OK) return
+        val uri = data?.data ?: return
+
+        when (requestCode) {
+            REQ_EXPORT_DICT -> {
+                try {
+                    contentResolver.openOutputStream(uri)?.use { output ->
+                        output.write(UserDictStore.exportText(this).toByteArray(Charsets.UTF_8))
+                    }
+                    Toast.makeText(this, R.string.toast_exported, Toast.LENGTH_SHORT).show()
+                } catch (t: Throwable) {
+                    Toast.makeText(this, R.string.toast_invalid, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            REQ_IMPORT_DICT -> {
+                try {
+                    val text = contentResolver.openInputStream(uri)
+                        ?.bufferedReader(Charsets.UTF_8)
+                        ?.use { it.readText() }
+                        ?: ""
+                    val count = UserDictStore.importText(this, text)
+                    refreshDictCount()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.toast_imported, count),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (t: Throwable) {
+                    Toast.makeText(this, R.string.toast_invalid, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun refreshDictCount() {
@@ -382,6 +503,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun dp(value: Int): Int = Compat.dp(this, value)
+
+    companion object {
+        private const val REQ_EXPORT_DICT = 1001
+        private const val REQ_IMPORT_DICT = 1002
+    }
 
     /**
      * 系统栏适配：

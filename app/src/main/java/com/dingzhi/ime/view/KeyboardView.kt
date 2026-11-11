@@ -3,17 +3,26 @@ package com.dingzhi.ime.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.customview.widget.ExploreByTouchHelper
+import com.dingzhi.ime.R
 import com.dingzhi.ime.core.Prefs
 import com.dingzhi.ime.input.Key
 import com.dingzhi.ime.input.KeyType
 import com.dingzhi.ime.theme.Skin
 import com.dingzhi.ime.theme.SkinFactory
 import com.dingzhi.ime.util.Compat
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * 自绘键盘视图。
@@ -23,15 +32,27 @@ import com.dingzhi.ime.util.Compat
  * - 自绘可以精确控制圆角、配色、按下态、候选高亮，保证 4.4 到 14 的视觉一致；
  * - 只使用 Canvas 的 drawRoundRect / drawText，API 19 完全支持，不需要新 API。
  *
- * 触摸逻辑：
- * - 手指按下立即触发按键（响应更快）；
+ * 性能：
+ * - 按键矩形与文字宽度在布局阶段算好并缓存，onDraw 只做纯绘制，不再 measureText；
+ * - 按下 / 抬起只重绘受影响的两个按键矩形，不整屏刷新；
+ * - 退格长按连删时同样只重绘按键本身。
+ *
+ * 交互：
+ * - 普通功能键按下立即触发；
+ * - 字母键抬起时触发，长按 350ms 输入对应数字/符号，避免长按多打一个字母；
  * - 退格键按住 420ms 后每 45ms 连续删除；
- * - 手指滑出按键时取消高亮，但不会取消已经触发的输入。
+ * - 手指移动超过系统 touch slop 后重新定位高亮，避免误触导致的高亮错位。
+ *
+ * 无障碍：
+ * - 通过 ExploreByTouchHelper 为每个按键生成虚拟节点，TalkBack 可以逐键朗读与点击。
  */
 class KeyboardView(context: Context) : View(context) {
 
     interface Listener {
         fun onKey(key: Key)
+
+        /** 字母键长按输入数字/符号；默认不处理 */
+        fun onKeyLongPress(key: Key) {}
     }
 
     var listener: Listener? = null
@@ -48,18 +69,37 @@ class KeyboardView(context: Context) : View(context) {
     /** 与 rows 一一对应的按键矩形 */
     private val keyRects = ArrayList<ArrayList<RectF>>()
 
+    /** 与 rows 对应的文字绘制尺寸与宽度缓存，避免 onDraw 里 measureText */
+    private val textSizes = ArrayList<ArrayList<Float>>()
+    private val textWidths = ArrayList<ArrayList<Float>>()
+
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var pressedKey: Key? = null
+    private var pendingKey: Key? = null
+    private var longPressFired = false
 
-    private val density = resources.displayMetrics.density
-    private val keyGap = 5f * density
-    private val sidePadding = 3f * density
-    private val rowGap = 6f * density
-    private val verticalPadding = 4f * density
+    private var downX = 0f
+    private var downY = 0f
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+
+    private val keyGap = resources.getDimension(R.dimen.key_gap)
+    private val sidePadding = resources.getDimension(R.dimen.key_side_padding)
+    private val rowGap = resources.getDimension(R.dimen.key_row_gap)
+    private val verticalPadding = resources.getDimension(R.dimen.key_vertical_padding)
+    private val charTextSize = resources.getDimension(R.dimen.key_char_text)
+    private val funcTextSize = resources.getDimension(R.dimen.key_func_text)
+    private val textPadding = resources.getDimension(R.dimen.key_text_padding)
 
     private val handler = Handler(Looper.getMainLooper())
+
+    private val accessibilityHelper by lazy { KeyTouchHelper(this) }
+
+    init {
+        isFocusable = true
+        ViewCompat.setAccessibilityDelegate(this, accessibilityHelper)
+    }
 
     /** 退格长按连续删除 */
     private val repeatRunnable = object : Runnable {
@@ -67,8 +107,17 @@ class KeyboardView(context: Context) : View(context) {
             val key = pressedKey ?: return
             if (key.type != KeyType.DELETE) return
             listener?.onKey(key)
-            handler.postDelayed(this, 45L)
+            handler.postDelayed(this, DELETE_REPEAT_INTERVAL_MS)
         }
+    }
+
+    /** 字母键长按输入数字 / 符号 */
+    private val longPressRunnable = Runnable {
+        val key = pendingKey ?: return@Runnable
+        if (key.secondary.isEmpty()) return@Runnable
+        longPressFired = true
+        pendingKey = null
+        listener?.onKeyLongPress(key)
     }
 
     // ==================================================================
@@ -77,6 +126,10 @@ class KeyboardView(context: Context) : View(context) {
     fun setRows(list: List<List<Key>>) {
         rows = list
         pressedKey = null
+        pendingKey = null
+        longPressFired = false
+        handler.removeCallbacks(repeatRunnable)
+        handler.removeCallbacks(longPressRunnable)
         buildRects()
         invalidate()
     }
@@ -93,9 +146,11 @@ class KeyboardView(context: Context) : View(context) {
         buildRects()
     }
 
-    /** 根据当前尺寸计算每个按键的矩形 */
+    /** 根据当前尺寸计算每个按键的矩形与文字尺寸 */
     private fun buildRects() {
         keyRects.clear()
+        textSizes.clear()
+        textWidths.clear()
         if (width <= 0 || height <= 0 || rows.isEmpty()) return
 
         val rowHeight = (height - verticalPadding * 2 - rowGap * (rows.size - 1)) / rows.size
@@ -107,15 +162,44 @@ class KeyboardView(context: Context) : View(context) {
             val available = width - sidePadding * 2 - keyGap * (row.size - 1)
 
             val rects = ArrayList<RectF>(row.size)
+            val sizes = ArrayList<Float>(row.size)
+            val widths = ArrayList<Float>(row.size)
             var left = sidePadding
             for (key in row) {
                 val keyWidth = if (totalWeight > 0f) available * (key.weight / totalWeight) else 0f
-                rects.add(RectF(left, top, left + keyWidth, top + rowHeight))
+                val rect = RectF(left, top, left + keyWidth, top + rowHeight)
+                rects.add(rect)
+
+                // 文字尺寸只在布局阶段计算一次，onDraw 直接使用缓存
+                val result = measureLabel(key, rect)
+                sizes.add(result.first)
+                widths.add(result.second)
+
                 left += keyWidth + keyGap
             }
             keyRects.add(rects)
+            textSizes.add(sizes)
+            textWidths.add(widths)
             top += rowHeight + rowGap
         }
+    }
+
+    /** 返回 (文字大小, 文字宽度)，文字过宽时等比缩小 */
+    private fun measureLabel(key: Key, rect: RectF): Pair<Float, Float> {
+        if (key.label.isEmpty() || key.type == KeyType.NONE || rect.width() <= 0f) {
+            return Pair(charTextSize, 0f)
+        }
+        val base = if (key.type == KeyType.CHAR) charTextSize else funcTextSize
+        textPaint.textSize = base
+        var width = textPaint.measureText(key.label)
+        var size = base
+        val maxWidth = rect.width() - textPadding * 2
+        if (width > maxWidth && width > 0f && maxWidth > 0f) {
+            size = base * maxWidth / width
+            textPaint.textSize = size
+            width = textPaint.measureText(key.label)
+        }
+        return Pair(size, width)
     }
 
     // ==================================================================
@@ -128,15 +212,17 @@ class KeyboardView(context: Context) : View(context) {
         for (rowIndex in rows.indices) {
             val row = rows[rowIndex]
             val rects = keyRects.getOrNull(rowIndex) ?: continue
+            val sizes = textSizes.getOrNull(rowIndex) ?: continue
+            val widths = textWidths.getOrNull(rowIndex) ?: continue
             for (i in row.indices) {
                 val key = row[i]
                 if (key.type == KeyType.NONE) continue
-                drawKey(canvas, key, rects[i])
+                drawKey(canvas, key, rects[i], sizes[i], widths[i])
             }
         }
     }
 
-    private fun drawKey(canvas: Canvas, key: Key, rect: RectF) {
+    private fun drawKey(canvas: Canvas, key: Key, rect: RectF, textSize: Float, textWidth: Float) {
         if (rect.width() <= 0f || rect.height() <= 0f) return
 
         val isFunc = key.type != KeyType.CHAR
@@ -149,7 +235,7 @@ class KeyboardView(context: Context) : View(context) {
             else -> skin.keyBg
         }
 
-        val radius = Math.min(skin.keyRadiusPx, Math.min(rect.width(), rect.height()) / 2f)
+        val radius = min(skin.keyRadiusPx, min(rect.width(), rect.height()) / 2f)
         canvas.drawRoundRect(rect, radius, radius, bgPaint)
 
         // 按下蒙层
@@ -161,18 +247,7 @@ class KeyboardView(context: Context) : View(context) {
         val label = key.label
         if (label.isEmpty()) return
 
-        var textSize = if (isFunc) FUNC_TEXT_DP * density else CHAR_TEXT_DP * density
         textPaint.textSize = textSize
-        var textWidth = textPaint.measureText(label)
-
-        // 文字过宽时等比缩小，避免「退格 / 回车」在窄屏上溢出
-        val maxWidth = rect.width() - KEY_TEXT_PADDING_DP * density * 2
-        if (textWidth > maxWidth && textWidth > 0f && maxWidth > 0f) {
-            textSize = textSize * maxWidth / textWidth
-            textPaint.textSize = textSize
-            textWidth = textPaint.measureText(label)
-        }
-
         textPaint.color = when {
             accentBg -> skin.onAccent
             isFunc -> skin.funcText
@@ -190,33 +265,79 @@ class KeyboardView(context: Context) : View(context) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                val old = pressedKey
                 val key = findKey(event.x, event.y)
                 pressedKey = key
+                pendingKey = null
+                longPressFired = false
+                downX = event.x
+                downY = event.y
+                handler.removeCallbacks(repeatRunnable)
+                handler.removeCallbacks(longPressRunnable)
+
                 if (key != null) {
-                    listener?.onKey(key)
-                    if (key.type == KeyType.DELETE) {
-                        handler.removeCallbacks(repeatRunnable)
-                        handler.postDelayed(repeatRunnable, 420L)
+                    when {
+                        key.type == KeyType.DELETE -> {
+                            listener?.onKey(key)
+                            handler.postDelayed(repeatRunnable, DELETE_REPEAT_DELAY_MS)
+                        }
+                        key.secondary.isNotEmpty() -> {
+                            // 字母键：先不输入，抬起时输入字母，长按则输入数字 / 符号
+                            pendingKey = key
+                            handler.postDelayed(longPressRunnable, LONG_PRESS_MS)
+                        }
+                        else -> listener?.onKey(key)
                     }
                 }
-                invalidate()
+                if (old !== key) invalidateKey(old)
+                invalidateKey(key)
                 return true
             }
 
             MotionEvent.ACTION_MOVE -> {
+                if (pressedKey == null) return true
+                // 在系统 touch slop 内不改变高亮，避免轻微抖动导致高亮闪烁
+                if (abs(event.x - downX) <= touchSlop && abs(event.y - downY) <= touchSlop) {
+                    return true
+                }
                 val key = findKey(event.x, event.y)
                 if (key !== pressedKey) {
+                    val old = pressedKey
                     pressedKey = key
+                    // 滑出原键后取消尚未触发的字母输入与长按
+                    pendingKey = null
+                    longPressFired = false
                     handler.removeCallbacks(repeatRunnable)
-                    invalidate()
+                    handler.removeCallbacks(longPressRunnable)
+                    invalidateKey(old)
+                    invalidateKey(key)
                 }
                 return true
             }
 
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP -> {
+                val pending = pendingKey
+                if (!longPressFired && pending != null) {
+                    listener?.onKey(pending)
+                }
+                pendingKey = null
+                longPressFired = false
+                val old = pressedKey
                 pressedKey = null
                 handler.removeCallbacks(repeatRunnable)
-                invalidate()
+                handler.removeCallbacks(longPressRunnable)
+                invalidateKey(old)
+                return true
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                pendingKey = null
+                longPressFired = false
+                val old = pressedKey
+                pressedKey = null
+                handler.removeCallbacks(repeatRunnable)
+                handler.removeCallbacks(longPressRunnable)
+                invalidateKey(old)
                 return true
             }
         }
@@ -235,14 +356,136 @@ class KeyboardView(context: Context) : View(context) {
         return null
     }
 
+    private fun findRect(target: Key): RectF? {
+        for (rowIndex in rows.indices) {
+            val row = rows[rowIndex]
+            for (i in row.indices) {
+                if (row[i] === target) {
+                    return keyRects.getOrNull(rowIndex)?.getOrNull(i)
+                }
+            }
+        }
+        return null
+    }
+
+    /** 只重绘指定按键所在的矩形区域 */
+    private fun invalidateKey(key: Key?) {
+        if (key == null) return
+        val rect = findRect(key) ?: return
+        val pad = keyGap
+        invalidate(
+            (rect.left - pad).toInt(),
+            (rect.top - pad).toInt(),
+            (rect.right + pad).toInt(),
+            (rect.bottom + pad).toInt()
+        )
+    }
+
     override fun onDetachedFromWindow() {
         handler.removeCallbacksAndMessages(null)
         super.onDetachedFromWindow()
     }
 
+    // ==================================================================
+    // 无障碍
+    // ==================================================================
+    override fun dispatchHoverEvent(event: MotionEvent): Boolean {
+        return accessibilityHelper.dispatchHoverEvent(event) || super.dispatchHoverEvent(event)
+    }
+
+    private fun idOf(key: Key): Int {
+        for (rowIndex in rows.indices) {
+            val row = rows[rowIndex]
+            for (i in row.indices) {
+                if (row[i] === key) return rowIndex * VIRTUAL_ID_ROW_FACTOR + i
+            }
+        }
+        return ExploreByTouchHelper.INVALID_ID
+    }
+
+    private fun accessibilityLabel(key: Key): String {
+        if (key.label.isNotEmpty()) return key.label
+        return when (key.type) {
+            KeyType.SHIFT -> "大写"
+            KeyType.DELETE -> "退格"
+            KeyType.ENTER -> "回车"
+            KeyType.SPACE -> "空格"
+            KeyType.LANG -> "中英文切换"
+            KeyType.LAYOUT -> "切换布局"
+            KeyType.NONE -> ""
+            KeyType.CHAR -> key.value
+        }
+    }
+
+    private inner class KeyTouchHelper(host: View) : ExploreByTouchHelper(host) {
+
+        override fun getVirtualViewAt(x: Float, y: Float): Int {
+            val key = findKey(x, y) ?: return ExploreByTouchHelper.HOST_ID
+            return idOf(key)
+        }
+
+        override fun getVisibleVirtualViews(virtualViewIds: MutableList<Int>) {
+            for (rowIndex in rows.indices) {
+                val row = rows[rowIndex]
+                for (i in row.indices) {
+                    if (row[i].type != KeyType.NONE) {
+                        virtualViewIds.add(rowIndex * VIRTUAL_ID_ROW_FACTOR + i)
+                    }
+                }
+            }
+        }
+
+        override fun onPopulateNodeForVirtualView(
+            virtualViewId: Int,
+            node: AccessibilityNodeInfoCompat
+        ) {
+            val rowIndex = virtualViewId / VIRTUAL_ID_ROW_FACTOR
+            val column = virtualViewId % VIRTUAL_ID_ROW_FACTOR
+            val key = rows.getOrNull(rowIndex)?.getOrNull(column)
+            if (key == null) {
+                node.contentDescription = ""
+                node.setBoundsInParent(Rect())
+                return
+            }
+            val label = accessibilityLabel(key)
+            node.contentDescription = label
+            node.text = label
+            node.className = "android.widget.Button"
+            node.isClickable = true
+            node.isFocusable = true
+            node.isEnabled = true
+
+            val rect = keyRects.getOrNull(rowIndex)?.getOrNull(column)
+            node.setBoundsInParent(
+                if (rect == null) Rect()
+                else Rect(
+                    rect.left.toInt(),
+                    rect.top.toInt(),
+                    rect.right.toInt(),
+                    rect.bottom.toInt()
+                )
+            )
+        }
+
+        override fun onPerformActionForVirtualView(
+            virtualViewId: Int,
+            action: Int,
+            arguments: Bundle?
+        ): Boolean {
+            if (action != AccessibilityNodeInfoCompat.ACTION_CLICK) return false
+            val rowIndex = virtualViewId / VIRTUAL_ID_ROW_FACTOR
+            val column = virtualViewId % VIRTUAL_ID_ROW_FACTOR
+            val key = rows.getOrNull(rowIndex)?.getOrNull(column) ?: return false
+            listener?.onKey(key)
+            return true
+        }
+    }
+
     companion object {
-        private const val CHAR_TEXT_DP = 20f
-        private const val FUNC_TEXT_DP = 12f
-        private const val KEY_TEXT_PADDING_DP = 4f
+        private const val DELETE_REPEAT_DELAY_MS = 420L
+        private const val DELETE_REPEAT_INTERVAL_MS = 45L
+        private const val LONG_PRESS_MS = 350L
+        /** 虚拟节点 id = 行号 * 该系数 + 列号，按键列数远小于 100 */
+        private const val VIRTUAL_ID_ROW_FACTOR = 100
     }
 }

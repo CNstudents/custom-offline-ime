@@ -3,6 +3,7 @@
     <string name="app_name">定制版输入法</string>
     <string name="ime_name">定制版输入法</string>
     <string name="ime_subtype_zh">中文（全拼）</string>
+    <string name="ime_subtype_en">英文（QWERTY）</string>
     <string name="tagline">全离线 · 无网络 · 无广告 · 无埋点</string>
 
     <!-- 状态卡片 -->
@@ -20,6 +21,7 @@
     <string name="label_dark">深色皮肤</string>
     <string name="hint_dark">App 内手动切换，不依赖系统深色模式，Android 4.4 同样有效</string>
     <string name="label_height">键盘高度</string>
+    <string name="hint_height" formatted="false">默认高度按屏幕高度自适应；拖动后使用固定值，并自动限制在屏幕的 24%~52% 之间。</string>
     <string name="label_radius">按键圆角</string>
     <string name="label_accent">主题色</string>
     <string name="unit_dp">%1$d dp</string>
@@ -38,6 +40,17 @@
     <string name="btn_add_word">添加词条</string>
     <string name="btn_add_phrase">添加短语</string>
     <string name="btn_clear_dict">清空</string>
+    <string name="btn_manage_dict">管理</string>
+    <string name="btn_export_dict">导出</string>
+    <string name="btn_import_dict">导入</string>
+    <string name="dialog_manage_title">管理自定义词库（点击条目删除）</string>
+    <string name="dialog_delete_title">删除词条</string>
+    <string name="dialog_delete_msg">确定删除「%1$s」吗？</string>
+    <string name="btn_close">关闭</string>
+    <string name="toast_deleted">已删除</string>
+    <string name="toast_exported">已导出为文本文件</string>
+    <string name="toast_imported">已导入 %1$d 条</string>
+    <string name="toast_empty_dict">当前没有可管理的词条</string>
     <string name="dialog_add_word_title">添加自定义词条</string>
     <string name="dialog_add_phrase_title">添加快捷短语</string>
     <string name="hint_pinyin">拼音，如 zhangsan</string>
@@ -63,5 +76,5 @@
     <string name="version_fmt">版本 %1$s · minSdk 19 / targetSdk 34</string>
     <string name="btn_version_note">查看版本说明</string>
     <string name="version_note_title">版本说明</string>
-    <string name="version_note_text">定制版输入法 1.0.0\n\n适配范围：Android 4.4（API 19）至 Android 14（API 34）\n\n功能：\n• 26 键全拼 / 简拼 / 中文联想\n• 英文、数字、符号键盘\n• 深浅两套皮肤、主题色、键盘高度、按键圆角自定义\n• 按键震动 / 音效开关\n• 本地自定义词条与快捷短语\n\n说明：本版本完全离线，无任何网络请求。</string>
+    <string name="version_note_text">定制版输入法 1.1.0\n\n适配范围：Android 4.4（API 19）至 Android 14（API 34）\n\n本次更新：\n• 候选栏 View 复用、皮肤 / 震动 / 音效缓存，老机型更流畅\n• 键盘局部重绘与候选查询缓存\n• 新增九键 T9 布局、候选翻页、超长拼音自动上屏\n• 字母键长按输入数字 / 符号，英文句首自动大写\n• 光标移动后自动重置拼音缓冲，修正错位上屏\n• 自定义词库支持单条删除与 txt 导入 / 导出\n• 新增英文 ASCII 子类型，改善密码框兼容性\n• 支持 TalkBack 逐键朗读与点击\n• 开启 R8 代码压缩，安装包更小\n\n说明：本版本完全离线，无任何网络请求。</string>
 </resources>

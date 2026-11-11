@@ -89,7 +89,81 @@ object UserDictStore {
             .apply()
     }
 
+    /** 删除单条自定义词条（拼音 + 词语精确匹配） */
+    fun removeWord(context: Context, pinyin: String, word: String) {
+        val target = pinyin.trim().lowercase() + "\t" + sanitize(word)
+        removeLine(context, KEY_WORDS, target)
+    }
+
+    /** 删除单条快捷短语（编码 + 内容精确匹配） */
+    fun removePhrase(context: Context, code: String, text: String) {
+        val target = code.trim().lowercase() + "\t" + sanitize(text)
+        removeLine(context, KEY_PHRASES, target)
+    }
+
+    /**
+     * 导出为纯文本，格式：
+     *   [words]
+     *   pinyin \t word
+     *   [phrases]
+     *   code \t text
+     * 用制表符分隔，便于用记事本直接编辑后再导入。
+     */
+    fun exportText(context: Context): String {
+        val sb = StringBuilder()
+        sb.append("# 定制版输入法词库导出\n")
+        sb.append("# 词条格式：拼音<TAB>词语；短语格式：编码<TAB>内容\n")
+        sb.append("[words]\n")
+        for (item in words(context)) {
+            sb.append(item.pinyin).append('\t').append(item.word).append('\n')
+        }
+        sb.append("[phrases]\n")
+        for (item in phrases(context)) {
+            sb.append(item.code).append('\t').append(item.text).append('\n')
+        }
+        return sb.toString()
+    }
+
+    /**
+     * 从纯文本导入，返回尝试导入的条数。
+     * 支持 [words] / [phrases] 分节；没有分节时默认按词条处理。
+     */
+    fun importText(context: Context, text: String): Int {
+        var phraseSection = false
+        var count = 0
+        for (raw in text.split("\n")) {
+            val line = raw.trim()
+            if (line.isEmpty() || line.startsWith("#")) continue
+            if (line.equals("[words]", ignoreCase = true)) {
+                phraseSection = false
+                continue
+            }
+            if (line.equals("[phrases]", ignoreCase = true)) {
+                phraseSection = true
+                continue
+            }
+            val index = line.indexOf('\t')
+            if (index <= 0 || index >= line.length - 1) continue
+            val left = line.substring(0, index).trim()
+            val right = line.substring(index + 1).trim()
+            val ok = if (phraseSection) addPhrase(context, left, right) else addWord(context, left, right)
+            if (ok) count++
+        }
+        return count
+    }
+
     // ---------------- 内部实现 ----------------
+    private fun removeLine(context: Context, key: String, target: String) {
+        val prefs = Prefs.sp(context)
+        val current = prefs.getString(key, "") ?: ""
+        if (current.isEmpty()) return
+        val kept = ArrayList<String>()
+        for (line in current.split("\n")) {
+            if (line.isNotEmpty() && line != target) kept.add(line)
+        }
+        prefs.edit().putString(key, joinLines(kept)).apply()
+    }
+
     private fun appendLine(context: Context, key: String, line: String): Boolean {
         val prefs = Prefs.sp(context)
         val current = prefs.getString(key, "") ?: ""

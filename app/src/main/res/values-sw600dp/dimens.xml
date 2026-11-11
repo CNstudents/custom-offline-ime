@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 平板 / 大屏：按键与候选栏适当放大，避免视觉过空 -->
+<resources>
+    <dimen name="candidate_bar_height">44dp</dimen>
+    <dimen name="key_gap">6dp</dimen>
+    <dimen name="key_side_padding">6dp</dimen>
+    <dimen name="key_row_gap">8dp</dimen>
+    <dimen name="key_vertical_padding">6dp</dimen>
+    <dimen name="key_text_padding">5dp</dimen>
+    <dimen name="key_char_text">22sp</dimen>
+    <dimen name="key_func_text">14sp</dimen>
+</resources>

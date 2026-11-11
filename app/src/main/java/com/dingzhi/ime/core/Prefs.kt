@@ -2,6 +2,7 @@ package com.dingzhi.ime.core
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.dingzhi.ime.util.Compat
 
 /**
  * 全局设置读写。
@@ -30,6 +31,12 @@ object Prefs {
     const val MIN_HEIGHT_DP = 190
     const val MAX_HEIGHT_DP = 360
     const val DEFAULT_HEIGHT_DP = 252
+
+    /** 默认键盘高度占屏幕高度的比例 */
+    private const val DEFAULT_SCREEN_RATIO = 0.36f
+    /** 键盘高度相对屏幕高度的上下限，避免横屏 / 平板上比例失衡 */
+    private const val MIN_SCREEN_RATIO = 0.24f
+    private const val MAX_SCREEN_RATIO = 0.52f
 
     const val MIN_RADIUS_DP = 0
     const val MAX_RADIUS_DP = 16
@@ -73,6 +80,27 @@ object Prefs {
         sp(context).edit()
             .putInt(KEY_KEYBOARD_HEIGHT, value.coerceIn(MIN_HEIGHT_DP, MAX_HEIGHT_DP))
             .apply()
+    }
+
+    /**
+     * 实际键盘高度（像素）。
+     *
+     * 默认高度不再写死为固定 dp，而是按屏幕高度百分比计算，
+     * 这样在 4.7 寸小屏与 6.7 寸大屏、平板上都能获得接近的视觉比例；
+     * 用户手动拖动过高度后使用其固定值，并仍然按屏幕高度做上下限保护，
+     * 避免横屏时键盘占满屏幕。
+     */
+    fun keyboardHeightPx(context: Context): Int {
+        val screenHeight = context.resources.displayMetrics.heightPixels
+        val stored = keyboardHeightDp(context)
+        val raw = if (stored == DEFAULT_HEIGHT_DP) {
+            (screenHeight * DEFAULT_SCREEN_RATIO).toInt()
+        } else {
+            Compat.dp(context, stored)
+        }
+        val minPx = (screenHeight * MIN_SCREEN_RATIO).toInt()
+        val maxPx = (screenHeight * MAX_SCREEN_RATIO).toInt()
+        return raw.coerceIn(minPx, maxPx)
     }
 
     // ---------------- 按键反馈 ----------------

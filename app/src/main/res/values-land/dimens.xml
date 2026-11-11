@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 横屏时压缩候选栏与按键间距，把更多高度留给输入框 -->
+<resources>
+    <dimen name="candidate_bar_height">32dp</dimen>
+    <dimen name="key_gap">4dp</dimen>
+    <dimen name="key_side_padding">3dp</dimen>
+    <dimen name="key_row_gap">5dp</dimen>
+    <dimen name="key_vertical_padding">3dp</dimen>
+    <dimen name="key_text_padding">3dp</dimen>
+    <dimen name="key_char_text">17sp</dimen>
+    <dimen name="key_func_text">11sp</dimen>
+</resources>

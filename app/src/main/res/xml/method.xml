@@ -2,8 +2,12 @@
 <!--
   输入法子类型声明：
   - settingsActivity 指向设置页，系统输入法管理界面可直接跳到本应用设置
-  - 只声明一个中文（全拼）子类型，英文/数字/符号键盘由应用内「中/英」「123」键切换，
-    这样在老系统上不会出现子类型切换弹窗，兼容性最好
+  - 中文（全拼）子类型：默认拼音候选
+  - 英文（QWERTY）子类型：isAsciiCapable=true，系统在需要纯 ASCII 输入
+    （密码框、部分搜索框）时会优先选择它，同时用户也可以在系统输入法
+    切换面板中直接切到英文子类型
+  - supportsSwitchingToNextInputMethod=false：避免部分 ROM 在地球键上
+    触发系统级切换弹窗，语言切换统一由应用内「中 / 英」键完成
 -->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:settingsActivity="com.dingzhi.ime.SettingsActivity"
@@ -14,4 +18,10 @@
         android:imeSubtypeLocale="zh_CN"
         android:imeSubtypeMode="keyboard"
         android:isAsciiCapable="false" />
+
+    <subtype
+        android:label="@string/ime_subtype_en"
+        android:imeSubtypeLocale="en_US"
+        android:imeSubtypeMode="keyboard"
+        android:isAsciiCapable="true" />
 </input-method>

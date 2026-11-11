@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 
 /**
@@ -30,6 +31,28 @@ object Compat {
             context,
             Manifest.permission.VIBRATE
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * 当前输入法子类型的语言（小写，例如 "zh" / "en"）。
+     * 用于区分 method.xml 中的中英文子类型：英文子类型启动时直接进入英文模式。
+     * getCurrentInputMethodSubtype 从 API 11 起可用；Subtype.locale 从 API 24 起可用。
+     */
+    fun currentSubtypeLocale(context: Context): String {
+        return try {
+            val manager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                ?: return ""
+            val subtype = manager.currentInputMethodSubtype ?: return ""
+            val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                subtype.locale
+            } else {
+                @Suppress("DEPRECATION")
+                subtype.getLocale()
+            }
+            locale.lowercase()
+        } catch (t: Throwable) {
+            ""
+        }
     }
 
     /**
